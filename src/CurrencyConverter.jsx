@@ -37,7 +37,7 @@ const CurrencyConverter = () => {
 
   useEffect(() => {
     setRates(exchangeRates);
-  }, []);
+  }, [exchangeRates]);
 
   useEffect(() => {
     if (amount && currency && rates[currency]) {
