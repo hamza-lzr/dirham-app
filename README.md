@@ -1,53 +1,85 @@
-# Getting Started with Create React App
+# Currency Converter - Morocco Edition
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, responsive web application that converts various world currencies to Moroccan currency denominations: Dirham (MAD), Franc (cents), and Ryal.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Multi-Currency Support**: Convert from 9 major currencies (USD, EUR, GBP, JPY, INR, AED, SAR, EGP, TND)
+- **Three Currency Types**:
+  - **Moroccan Dirham (د.م.)** - Main currency
+  - **Moroccan Franc (ف)** - Cents (1 Dirham = 100 Francs)
+  - **Moroccan Ryal (ر)** - Alternative denomination (1 Dirham = 20 Ryals)
+- **Real-time Conversion**: Instant calculations as you type
+- **Beautiful UI**: Built with React and styled with Tailwind CSS
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
 
-### `npm start`
+## Exchange Rates
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The converter uses the following approximate exchange rates to Moroccan Dirham:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- 1 USD = 10.5 MAD
+- 1 EUR = 11.5 MAD
+- 1 GBP = 13.2 MAD
+- 1 JPY = 0.072 MAD
+- 1 INR = 0.126 MAD
+- 1 AED = 2.86 MAD
+- 1 SAR = 2.8 MAD
+- 1 EGP = 0.34 MAD
+- 1 TND = 3.4 MAD
 
-### `npm test`
+*Note: These are approximate rates for demonstration. For real-world use, integrate with a live currency exchange API.*
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Installation
 
-### `npm run build`
+```bash
+# Install dependencies
+npm install
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# Start the development server
+npm start
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# Build for production
+npm run build
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Technologies Used
 
-### `npm run eject`
+- **React** - UI framework
+- **Tailwind CSS** - Utility-first CSS framework
+- **PostCSS** - CSS processing
+- **React Scripts** - Build tooling
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Development
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The app runs on `http://localhost:3000` in development mode. The page will reload when you make changes.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Project Structure
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```
+src/
+├── App.js              # Main app component
+├── CurrencyConverter.jsx - Currency converter component
+├── index.css           - Tailwind CSS imports and global styles
+└── index.js            - React entry point
+```
 
-## Learn More
+## How to Use
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. Enter the amount you want to convert
+2. Select the currency from the dropdown
+3. View real-time conversions to all three Moroccan currency types
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Future Enhancements
 
-### Code Splitting
+- Integrate with a live currency exchange API (e.g., Open Exchange Rates, Fixer.io)
+- Add more currencies
+- Reverse conversion (from MAD to other currencies)
+- Conversion history
+- Offline support
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## License
+
+This project is open source and available under the MIT License.
 
 ### Analyzing the Bundle Size
 
