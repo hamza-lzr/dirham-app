@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 const CurrencyConverter = () => {
   const [amount, setAmount] = useState('');
@@ -11,7 +11,7 @@ const CurrencyConverter = () => {
   });
 
   // Exchange rates to Moroccan Dirham (MAD) - using approximate real rates
-  const exchangeRates = {
+  const exchangeRates = useMemo(() => ({
     USD: 10.5,
     EUR: 11.5,
     GBP: 13.2,
@@ -21,7 +21,7 @@ const CurrencyConverter = () => {
     SAR: 2.8,
     EGP: 0.34,
     TND: 3.4,
-  };
+  }), []);
 
   const currencySymbols = {
     USD: '$',
