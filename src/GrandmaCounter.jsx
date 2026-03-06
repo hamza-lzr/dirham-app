@@ -1,182 +1,163 @@
 import React, { useState } from 'react';
+import { Repeat, History, Heart } from 'lucide-react';
+
+/* ── Conversion rates and metadata ── */
+const rates = {
+  mad:   1,
+  ryal:  20,
+  franc: 100,
+  doro:  2,
+};
+
+const currencyMeta = {
+  mad:   { symbol: 'DH',  name: 'Moroccan Dirham', abbr: 'MAD' },
+  ryal:  { symbol: 'Ry',  name: 'Moroccan Ryal',   abbr: 'RYL' },
+  franc: { symbol: 'Fr',  name: 'Moroccan Franc',  abbr: 'FRN' },
+  doro:  { symbol: '½',   name: 'Doro',            abbr: 'DRO' },
+};
+
+const formatNumber = (num, currency) => {
+  if (!num || isNaN(num)) return '';
+  const number = parseFloat(num);
+  if (currency === 'mad') {
+    return number.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+  return Math.round(number).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+};
 
 const GrandmaCounter = () => {
-  const [inputs, setInputs] = useState({
-    mad: '',
-    ryal: '',
-    franc: '',
-    doro: '',
-  });
+  const [inputs, setInputs] = useState({ mad: '', ryal: '', franc: '', doro: '' });
 
-  // Conversion rates to MAD
-  const rates = {
-    mad: 1,      // 1 MAD = 1 MAD
-    ryal: 20,    // 1 MAD = 20 Ryals
-    franc: 100,  // 1 MAD = 100 Francs
-    doro: 2,     // 1 MAD = 2 Doros
-  };
-
-  const currencySymbols = {
-    mad: 'د.م.',
-    ryal: 'ر',
-    franc: 'ف',
-    doro: '₽',
-  };
-
-  const currencyNames = {
-    mad: 'Moroccan Dirham',
-    ryal: 'Moroccan Ryal',
-    franc: 'Moroccan Franc',
-    doro: 'Doro',
-  };
-
-  // Format number with thousands delimiter
-  const formatNumber = (num, currency) => {
-    if (!num || isNaN(num)) return '';
-    
-    const number = parseFloat(num);
-    
-    // MAD can have decimals
-    if (currency === 'mad') {
-      return number.toLocaleString('en-US', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      });
-    }
-    
-    // All others as integers
-    return Math.round(number).toLocaleString('en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
-  };
-
-  // Handle input change and convert to all currencies
   const handleInputChange = (currency, value) => {
-    // Allow only numbers and decimal point
     const cleanValue = value.replace(/[^\d.]/g, '');
-    
-    if (!cleanValue || cleanValue === '' || isNaN(cleanValue)) {
-      setInputs({
-        mad: '',
-        ryal: '',
-        franc: '',
-        doro: '',
-      });
+    if (!cleanValue || isNaN(cleanValue)) {
+      setInputs({ mad: '', ryal: '', franc: '', doro: '' });
       return;
     }
-
     const numValue = parseFloat(cleanValue);
     const madValue = numValue / rates[currency];
-
     setInputs({
-      mad: formatNumber(madValue, 'mad'),
-      ryal: formatNumber(madValue * rates.ryal, 'ryal'),
-      franc: formatNumber(madValue * rates.franc, 'franc'),
-      doro: formatNumber(madValue * rates.doro, 'doro'),
+      mad:   formatNumber(madValue,                 'mad'),
+      ryal:  formatNumber(madValue * rates.ryal,    'ryal'),
+      franc: formatNumber(madValue * rates.franc,   'franc'),
+      doro:  formatNumber(madValue * rates.doro,    'doro'),
     });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 relative">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Lato:wght@300;400;700&display=swap');
-        * { font-family: 'Lato', sans-serif; }
-        h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
-        
-        .premium-card {
-          background: linear-gradient(135deg, rgba(30, 27, 22, 0.8) 0%, rgba(24, 23, 23, 0.8) 100%);
-          border: 1px solid rgba(217, 119, 6, 0.3);
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .premium-card:hover {
-          border-color: rgba(217, 119, 6, 0.6);
-          box-shadow: 0 20px 40px rgba(217, 119, 6, 0.1);
-          transform: translateY(-2px);
-        }
-        
-        .input-premium {
-          background: linear-gradient(135deg, rgba(30, 27, 22, 0.6) 0%, rgba(24, 23, 23, 0.6) 100%);
-          border: 1px solid rgba(217, 119, 6, 0.2);
-        }
-        
-        .input-premium:focus {
-          border-color: rgba(217, 119, 6, 0.6);
-          box-shadow: 0 0 20px rgba(217, 119, 6, 0.15);
-        }
-      `}</style>
+    <div className="min-h-screen flex items-start justify-center p-4 pt-10 pb-16">
+      <div className="w-full max-w-2xl">
 
-      <div className="relative z-10 w-full max-w-2xl pt-20">
-        {/* Card Container */}
-        <div className="backdrop-blur-xl bg-slate-900/40 border border-amber-700/30 rounded-2xl shadow-2xl p-8 md:p-10">
-          {/* Header */}
-          <div className="text-center mb-10">
-            <div className="text-amber-700 text-sm font-semibold uppercase tracking-widest mb-3 opacity-75">
-              Heritage Currency
+        {/* ── Header ── */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 text-amber-600/70 text-xs font-semibold uppercase tracking-widest mb-4">
+            <History size={12} />
+            <span>Heritage Currency</span>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-bold text-slate-100 mb-3 leading-tight">
+            Count with Grandma
+          </h1>
+          <p className="text-slate-500 text-sm font-light">
+            Traditional Moroccan currency conversion
+          </p>
+          <div className="h-px w-12 bg-gradient-to-r from-amber-700 to-transparent mx-auto mt-6" />
+        </div>
+
+        {/* ── Main Card ── */}
+        <div className="backdrop-blur-xl bg-slate-900/50 border border-amber-700/20 rounded-2xl shadow-2xl shadow-slate-950/60 overflow-hidden">
+
+          {/* Top accent line */}
+          <div className="h-px bg-gradient-to-r from-transparent via-amber-700/40 to-transparent" />
+
+          <div className="p-8 md:p-10">
+
+            {/* Input Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
+              {Object.entries(currencyMeta).map(([key, { symbol, name, abbr }]) => (
+                <CurrencyInput
+                  key={key}
+                  currencyKey={key}
+                  symbol={symbol}
+                  name={name}
+                  abbr={abbr}
+                  value={inputs[key]}
+                  onChange={handleInputChange}
+                />
+              ))}
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-slate-100 mb-2">
-              Count with Grandma
-            </h1>
-            <p className="text-slate-400 text-base font-light">Traditional Moroccan currency conversion</p>
-            <div className="h-0.5 w-16 bg-gradient-to-r from-amber-700 to-transparent mx-auto mt-6"></div>
-          </div>
 
-          {/* Input Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            {['mad', 'ryal', 'franc', 'doro'].map((currency) => (
-              <div key={currency}>
-                <label className="block text-amber-700 text-xs font-semibold mb-3 uppercase tracking-widest">
-                  {currencyNames[currency]}
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-4 text-amber-600 text-lg font-light">
-                    {currencySymbols[currency]}
-                  </span>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={inputs[currency]}
-                    onChange={(e) => handleInputChange(currency, e.target.value)}
-                    placeholder="0"
-                    className="input-premium w-full pl-12 pr-4 py-4 rounded-lg text-slate-100 placeholder-slate-500 text-lg font-light focus:outline-none"
-                  />
-                </div>
+            {/* ── Conversion Rates Reference ── */}
+            <div className="bg-amber-900/10 border border-amber-700/15 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Repeat size={12} className="text-amber-700/60" />
+                <p className="text-amber-600/80 text-xs font-semibold uppercase tracking-widest">Conversion Rates</p>
               </div>
-            ))}
-          </div>
-
-          {/* Conversion Info */}
-          <div className="bg-amber-900/10 border border-amber-700/20 rounded-lg p-6 backdrop-blur-sm">
-            <p className="text-amber-700 text-xs font-semibold mb-4 uppercase tracking-widest">Conversion Rates</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-xs text-slate-400">
-              <div className="hover:text-amber-700/70 transition-colors">
-                <p className="font-medium text-slate-300">1 MAD</p>
-                <p className="text-slate-500 text-xs mt-1">=  20 Ryals</p>
-              </div>
-              <div className="hover:text-amber-700/70 transition-colors">
-                <p className="font-medium text-slate-300">1 MAD</p>
-                <p className="text-slate-500 text-xs mt-1">= 100 Francs</p>
-              </div>
-              <div className="hover:text-amber-700/70 transition-colors">
-                <p className="font-medium text-slate-300">1 MAD</p>
-                <p className="text-slate-500 text-xs mt-1">= 2 Doros</p>
-              </div>
-              <div className="hover:text-amber-700/70 transition-colors">
-                <p className="font-medium text-slate-300">1 Doro</p>
-                <p className="text-slate-500 text-xs mt-1">= 0.5 MAD</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <RatePill top="1 MAD" bottom="20 Ryals" />
+                <RatePill top="1 MAD" bottom="100 Francs" />
+                <RatePill top="1 MAD" bottom="2 Doros" />
+                <RatePill top="1 Doro" bottom="0.5 MAD" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Footer text */}
-        <p className="text-center text-slate-500 text-xs mt-8 font-light">
+        {/* Footer */}
+        <p className="text-center text-slate-600 text-xs mt-6 font-light">
           Traditional Moroccan heritage currencies
+        </p>
+        <p className="flex items-center justify-center gap-1.5 text-slate-700 text-xs mt-2 font-light">
+          Made with <Heart size={10} className="text-amber-700/60 fill-amber-700/40" /> by Hamza
         </p>
       </div>
     </div>
   );
 };
+
+/* ── Sub-components ── */
+
+function CurrencyInput({ currencyKey, symbol, name, abbr, value, onChange }) {
+  return (
+    <div className="premium-card rounded-xl p-4">
+      {/* Card header */}
+      <div className="flex items-center justify-between mb-3">
+        <label
+          className="text-amber-600 text-xs font-semibold uppercase tracking-widest"
+          htmlFor={`input-${currencyKey}`}
+        >
+          {name}
+        </label>
+        <span className="text-slate-600 text-xs font-mono bg-slate-800/60 px-1.5 py-0.5 rounded border border-slate-700/40">
+          {abbr}
+        </span>
+      </div>
+
+      {/* Input field */}
+      <div className="relative">
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-600/70 text-base font-light select-none pointer-events-none">
+          {symbol}
+        </span>
+        <input
+          id={`input-${currencyKey}`}
+          type="text"
+          inputMode="decimal"
+          value={value}
+          onChange={e => onChange(currencyKey, e.target.value)}
+          placeholder="0"
+          className="input-premium w-full pl-10 pr-3 py-3 rounded-lg text-slate-100 placeholder-slate-600 text-base font-light"
+        />
+      </div>
+    </div>
+  );
+}
+
+function RatePill({ top, bottom }) {
+  return (
+    <div className="text-center px-3 py-2.5 rounded-lg bg-slate-800/30 border border-slate-700/20 hover:border-amber-700/20 transition-colors duration-300">
+      <p className="text-slate-400 text-xs font-medium">{top}</p>
+      <p className="text-slate-600 text-xs mt-0.5">= {bottom}</p>
+    </div>
+  );
+}
 
 export default GrandmaCounter;
