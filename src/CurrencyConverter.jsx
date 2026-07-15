@@ -1,21 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  ArrowDownUp,
-  Check,
   CheckCircle2,
   ChevronDown,
-  Clock3,
-  Copy,
-  Info,
-  RefreshCw,
   Search,
-  ShieldCheck,
-  WifiOff,
   X,
 } from 'lucide-react';
 import { fetchRate, getAvailableRate, getStoredRate } from './services/exchangeRates';
 import { copyText } from './utils/clipboard';
+import ConversionInstrument from './ConversionInstrument';
 
 const CURRENCY_META = {
   MAD: { symbol: 'DH', name: 'Moroccan Dirham' },
@@ -70,30 +63,6 @@ const formatValue = (value, currency) => {
     minimumFractionDigits: 0,
     maximumFractionDigits: currency === 'JPY' ? 0 : 2,
   });
-};
-
-const formatRate = value => value.toLocaleString('en-MA', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: value < 1 ? 4 : 3,
-});
-
-const formatTime = timestamp => {
-  if (!timestamp) return null;
-  return new Intl.DateTimeFormat('en-MA', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(timestamp);
-};
-
-const formatRelativeTime = timestamp => {
-  if (!timestamp) return 'Using a bundled estimate';
-  const elapsedMinutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
-  if (elapsedMinutes < 1) return 'Updated just now';
-  if (elapsedMinutes < 60) return `Updated ${elapsedMinutes}m ago`;
-  const elapsedHours = Math.floor(elapsedMinutes / 60);
-  if (elapsedHours < 24) return `Updated ${elapsedHours}h ago`;
-  const elapsedDays = Math.floor(elapsedHours / 24);
-  return `Updated ${elapsedDays}d ago`;
 };
 
 export default function CurrencyConverter() {
@@ -161,11 +130,6 @@ export default function CurrencyConverter() {
 
   const madValue = fromCurrency === 'MAD' ? numericAmount : result;
   const resultText = result === null ? '—' : formatValue(result, toCurrency);
-  const resultSizeClass = resultText.length > 18
-    ? 'value-compact'
-    : resultText.length > 12
-      ? 'value-long'
-      : '';
 
   const handleSwap = () => {
     setFromCurrency(toCurrency);
@@ -190,133 +154,60 @@ export default function CurrencyConverter() {
     }
   };
 
-  return (
-    <section className="page-shell" aria-labelledby="global-conversion-title">
-      <div className="page-heading">
-        <div className="eyebrow"><ShieldCheck size={13} /> Morocco-first rates</div>
-        <h1 id="global-conversion-title">Global Conversion</h1>
-        <p>MAD and the currencies that matter to you, with transparent rate freshness.</p>
-      </div>
+  const unitValues = [
+    {
+      key: 'mad',
+      label: 'Dirham',
+      value: Number.isFinite(madValue) ? formatValue(madValue, 'MAD') : '—',
+      suffix: 'MAD',
+    },
+    {
+      key: 'ryal',
+      label: 'Ryal',
+      value: Number.isFinite(madValue) ? Math.round(madValue * 20).toLocaleString('en-MA') : '—',
+      suffix: 'Ryal',
+    },
+    {
+      key: 'franc',
+      label: 'Franc',
+      value: Number.isFinite(madValue) ? Math.round(madValue * 100).toLocaleString('en-MA') : '—',
+      suffix: 'Franc',
+    },
+  ].map(unit => ({
+    ...unit,
+    copied: copiedKey === unit.key,
+    onCopy: () => copyValue(unit.key, unit.value, unit.suffix),
+  }));
 
-      <div className="conversion-panel">
-        <div className="conversion-grid">
-          <div className="money-field source-field">
-            <div className="field-kicker">From</div>
-            <div className="money-control">
-              <div className="amount-entry">
-                <input
-                  aria-label={`Amount in ${CURRENCY_META[fromCurrency].name}`}
-                  inputMode="decimal"
-                  autoComplete="off"
-                  value={amount}
-                  onChange={event => setAmount(sanitizeAmount(event.target.value))}
-                  placeholder="0"
-                />
-                {amount && (
-                  <button type="button" onClick={() => setAmount('')} aria-label="Clear amount">
-                    <X size={15} />
-                  </button>
-                )}
-              </div>
-              {fromCurrency === 'MAD' ? (
-                <LockedCurrency code="MAD" />
-              ) : (
-                <CurrencyPicker value={foreignCurrency} onChange={handleForeignChange} />
-              )}
-            </div>
-          </div>
+  const model = {
+    amount,
+    fromCurrency,
+    toCurrency,
+    fromName: CURRENCY_META[fromCurrency].name,
+    toName: CURRENCY_META[toCurrency].name,
+    result,
+    resultText,
+    foreignCurrency,
+    rate,
+    rateError,
+    isRefreshing,
+    copiedKey,
+    quickAmounts: QUICK_AMOUNTS,
+    unitValues,
+    onAmountChange: value => setAmount(sanitizeAmount(value)),
+    onClearAmount: () => setAmount(''),
+    onQuickAmount: value => setAmount(String(value)),
+    onSwap: handleSwap,
+    onCopyResult: () => copyValue('result', resultText, toCurrency),
+    onRefreshRate: () => refreshRate(foreignCurrency),
+    renderCurrencyControl: code => (
+      code === 'MAD'
+        ? <LockedCurrency code="MAD" />
+        : <CurrencyPicker value={foreignCurrency} onChange={handleForeignChange} />
+    ),
+  };
 
-          <div className="swap-wrap">
-            <button className="swap-button" type="button" onClick={handleSwap} aria-label="Swap conversion direction">
-              <ArrowDownUp size={18} />
-            </button>
-          </div>
-
-          <div className="money-field result-field">
-            <div className="field-kicker">To</div>
-            <div className="money-control result-control">
-              <output
-                className={resultSizeClass}
-                aria-live="polite"
-                aria-label={`Result in ${CURRENCY_META[toCurrency].name}`}
-              >
-                {resultText}
-              </output>
-              {toCurrency === 'MAD' ? (
-                <LockedCurrency code="MAD" />
-              ) : (
-                <CurrencyPicker value={foreignCurrency} onChange={handleForeignChange} />
-              )}
-            </div>
-            <button
-              className="copy-result"
-              type="button"
-              disabled={result === null}
-              onClick={() => copyValue('result', resultText, toCurrency)}
-            >
-              {copiedKey === 'result' ? <Check size={14} /> : <Copy size={14} />}
-              {copiedKey === 'result' ? 'Copied' : 'Copy result'}
-            </button>
-          </div>
-        </div>
-
-        <div className="conversion-actions">
-          <span>Quick amount</span>
-          <div className="quick-amounts" aria-label="Quick amounts">
-            {QUICK_AMOUNTS.map(value => (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={amount === String(value)}
-                onClick={() => setAmount(String(value))}
-              >
-                {value.toLocaleString('en-MA')}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <RateStatus
-          currency={foreignCurrency}
-          rate={rate}
-          isRefreshing={isRefreshing}
-          error={rateError}
-          onRefresh={() => refreshRate(foreignCurrency)}
-        />
-
-        <div className="unit-breakdown" aria-label="Moroccan unit breakdown">
-          <div className="breakdown-heading">
-            <span>Moroccan units</span>
-            <small>Based on the MAD side of this conversion</small>
-          </div>
-          <UnitResult
-            label="Dirham"
-            value={Number.isFinite(madValue) ? formatValue(madValue, 'MAD') : '—'}
-            suffix="MAD"
-            copied={copiedKey === 'mad'}
-            onCopy={() => copyValue('mad', formatValue(madValue, 'MAD'), 'MAD')}
-          />
-          <UnitResult
-            label="Ryal"
-            value={Number.isFinite(madValue) ? Math.round(madValue * 20).toLocaleString('en-MA') : '—'}
-            suffix="Ryal"
-            copied={copiedKey === 'ryal'}
-            onCopy={() => copyValue('ryal', Math.round(madValue * 20).toLocaleString('en-MA'), 'Ryal')}
-          />
-          <UnitResult
-            label="Franc"
-            value={Number.isFinite(madValue) ? Math.round(madValue * 100).toLocaleString('en-MA') : '—'}
-            suffix="Franc"
-            copied={copiedKey === 'franc'}
-            onCopy={() => copyValue('franc', Math.round(madValue * 100).toLocaleString('en-MA'), 'Franc')}
-          />
-        </div>
-      </div>
-
-      <p className="page-footnote">Rates are informational and may differ from bank or cash-exchange quotes.</p>
-      <span className="sr-only" aria-live="polite">{copiedKey ? 'Value copied to clipboard' : ''}</span>
-    </section>
-  );
+  return <ConversionInstrument model={model} />;
 }
 
 function CurrencyPicker({ value, onChange }) {
@@ -398,6 +289,36 @@ function CurrencyPicker({ value, onChange }) {
       closeMenu(true);
       return;
     }
+
+    const optionButtons = Array.from(menuRef.current?.querySelectorAll('[role="option"]') || []);
+    const currentOptionIndex = optionButtons.indexOf(document.activeElement);
+    const isOptionFocused = currentOptionIndex >= 0;
+
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      if (!optionButtons.length) return;
+      event.preventDefault();
+      const nextIndex = event.key === 'ArrowDown'
+        ? (isOptionFocused ? (currentOptionIndex + 1) % optionButtons.length : 0)
+        : (isOptionFocused ? (currentOptionIndex - 1 + optionButtons.length) % optionButtons.length : optionButtons.length - 1);
+      optionButtons[nextIndex].focus({ preventScroll: true });
+      optionButtons[nextIndex].scrollIntoView({ block: 'nearest' });
+      return;
+    }
+
+    if (isOptionFocused && (event.key === 'Home' || event.key === 'End')) {
+      event.preventDefault();
+      const nextOption = event.key === 'Home' ? optionButtons[0] : optionButtons[optionButtons.length - 1];
+      nextOption.focus({ preventScroll: true });
+      nextOption.scrollIntoView({ block: 'nearest' });
+      return;
+    }
+
+    if (isOptionFocused && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      choose(document.activeElement.dataset.currency);
+      return;
+    }
+
     if (event.key !== 'Tab' || !menuRef.current) return;
     const focusable = Array.from(menuRef.current.querySelectorAll('button:not([disabled]), input:not([disabled])'));
     if (!focusable.length) return;
@@ -420,6 +341,7 @@ function CurrencyPicker({ value, onChange }) {
       key={code}
       type="button"
       role="option"
+      data-currency={code}
       aria-selected={code === value}
       onClick={() => choose(code)}
     >
@@ -497,65 +419,5 @@ function LockedCurrency({ code }) {
       <span className="currency-symbol">{CURRENCY_META[code].symbol}</span>
       <span><strong>{code}</strong><small>{CURRENCY_META[code].name}</small></span>
     </div>
-  );
-}
-
-function RateStatus({ currency, rate, isRefreshing, error, onRefresh }) {
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const status = rate?.status || 'estimated';
-  const statusLabel = status === 'fresh' ? 'Fresh rate' : status === 'stale' ? 'Stale rate' : 'Estimated rate';
-  const StatusIcon = status === 'fresh' ? CheckCircle2 : status === 'stale' ? Clock3 : WifiOff;
-  const canRefresh = status !== 'fresh' || Boolean(error);
-
-  return (
-    <div className={`rate-status ${status}`} role="status">
-      <div className="rate-state">
-        <StatusIcon size={16} />
-        <div>
-          <strong>{statusLabel}</strong>
-          <span>{isRefreshing ? 'Checking for a newer rate…' : formatRelativeTime(rate?.fetchedAt)}</span>
-        </div>
-      </div>
-      <div className="rate-quote">
-        <span>1 {currency}</span>
-        <strong>{formatRate(rate.value)} MAD</strong>
-      </div>
-      <div className="rate-controls">
-        <button
-          type="button"
-          className="rate-info-button"
-          aria-label="Show rate details"
-          aria-expanded={detailsOpen}
-          onClick={() => setDetailsOpen(current => !current)}
-        >
-          <Info size={15} />
-        </button>
-        {canRefresh && (
-          <button type="button" className="rate-refresh-button" onClick={onRefresh} disabled={isRefreshing}>
-            <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
-            <span>{error ? 'Retry' : isRefreshing ? 'Updating' : 'Update'}</span>
-          </button>
-        )}
-      </div>
-      {detailsOpen && (
-        <div className="rate-details">
-          <div><span>Provider</span><strong>{rate?.source}</strong></div>
-          <div><span>Last update</span><strong>{rate?.fetchedAt ? formatTime(rate.fetchedAt) : 'Bundled estimate'}</strong></div>
-          <p>Informational rate only. Banks and cash offices may quote a different amount.</p>
-        </div>
-      )}
-      {error && <p className="rate-error">{error}</p>}
-    </div>
-  );
-}
-
-function UnitResult({ label, value, suffix, copied, onCopy }) {
-  return (
-    <button className="unit-result" type="button" onClick={onCopy} disabled={value === '—'} aria-label={`Copy ${label} value`}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-      <small>{suffix}</small>
-      {copied ? <Check size={14} /> : <Copy size={14} />}
-    </button>
   );
 }

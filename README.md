@@ -11,8 +11,10 @@ A Morocco-first money converter for global currencies, Moroccan Dirham, Ryal, an
 - Offline-safe bundled estimates when no fetched rate is available
 - Quick amounts and copyable results
 - Moroccan Unit Conversion using `1 MAD = 20 Ryal = 100 Franc`
-- Responsive dark Moroccan-inspired interface
-- Accessible labels, navigation state, keyboard focus, and live feedback
+- Practical Local Unit examples and expandable regional-convention guidance
+- URL-based tool navigation that works with refresh and browser history
+- Responsive warm Moroccan-modern interface with persisted light and dark modes
+- Accessible labels, skip navigation, keyboard controls, reduced-motion support, and live feedback
 
 MAD is always one side of a Global Conversion. Arbitrary foreign-to-foreign pairs are intentionally outside the product scope.
 
@@ -43,7 +45,9 @@ npm run build
 src/
 ├── App.js
 ├── CurrencyConverter.jsx
+├── ConversionInstrument.jsx
 ├── GrandmaCounter.jsx
+├── prototypes/            # Archived design exploration; not shipped in the UI
 ├── services/
 │   └── exchangeRates.js
 ├── utils/

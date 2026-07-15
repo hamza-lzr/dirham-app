@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Check, Copy, Heart, Info, RotateCcw, Sparkles } from 'lucide-react';
 import { copyText } from './utils/clipboard';
 
@@ -9,6 +9,11 @@ const UNITS = {
 };
 
 const EMPTY_VALUES = { mad: '', ryal: '', franc: '' };
+const EXAMPLES = [
+  { unit: 'mad', value: '10', label: '10 MAD' },
+  { unit: 'ryal', value: '100', label: '100 Ryal' },
+  { unit: 'franc', value: '1000', label: '1,000 Franc' },
+];
 
 const sanitizeAmount = value => {
   const normalized = value.replace(',', '.').replace(/[^\d.]/g, '');
@@ -24,6 +29,7 @@ export default function GrandmaCounter() {
   const [values, setValues] = useState(EMPTY_VALUES);
   const [activeUnit, setActiveUnit] = useState(null);
   const [copiedUnit, setCopiedUnit] = useState('');
+  const inputRefs = useRef({});
 
   const updateFrom = (unit, rawValue) => {
     const cleanValue = sanitizeAmount(rawValue);
@@ -55,19 +61,24 @@ export default function GrandmaCounter() {
     }
   };
 
+  const applyExample = example => {
+    updateFrom(example.unit, example.value);
+    window.requestAnimationFrame(() => inputRefs.current[example.unit]?.focus({ preventScroll: true }));
+  };
+
   return (
     <section className="page-shell units-page" aria-labelledby="moroccan-units-title">
       <div className="page-heading">
-        <div className="eyebrow"><Sparkles size={13} /> Count with Grandma</div>
+        <div className="eyebrow"><Sparkles size={13} /> Local money guide</div>
         <h1 id="moroccan-units-title">Moroccan Units</h1>
-        <p>Move naturally between Dirham, Ryal, and Franc.</p>
+        <p>Dirham, Ryal, and Franc—kept simple.</p>
       </div>
 
       <div className="units-panel">
         <div className="units-panel-heading">
           <div>
-            <span className="section-label">Enter any value</span>
-            <h2>Every unit updates instantly</h2>
+            <span className="section-label">One amount, three local units</span>
+            <h2>Enter any amount</h2>
           </div>
           <button
             type="button"
@@ -98,6 +109,7 @@ export default function GrandmaCounter() {
                 <span>{unit.symbol}</span>
                 <input
                   id={`unit-${key}`}
+                  ref={element => { inputRefs.current[key] = element; }}
                   aria-label={unit.name}
                   inputMode="decimal"
                   autoComplete="off"
@@ -108,21 +120,46 @@ export default function GrandmaCounter() {
                   placeholder="0"
                 />
               </div>
-              {activeUnit === key && <div className="driving-value">Editing this unit</div>}
             </div>
           ))}
         </div>
 
-        <div className="unit-convention">
-          <Info size={17} />
-          <div>
-            <strong>Convention used by this tool</strong>
-            <p>1 MAD = 20 Ryal = 100 Franc. Colloquial usage can vary by region.</p>
+        <div className="unit-examples">
+          <span>Try an example</span>
+          <div role="group" aria-label="Example amounts">
+            {EXAMPLES.map(example => (
+              <button
+                key={example.label}
+                type="button"
+                aria-pressed={values[example.unit] === example.value}
+                onClick={() => applyExample(example)}
+              >
+                {example.label}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
 
-      <p className="made-by">Made with <Heart size={11} /> by Hamza</p>
+        <div className="unit-facts" aria-label="Moroccan unit equivalences">
+          <div className="unit-fact">
+            <span>Ryal</span>
+            <strong>1 MAD = 20 Ryal</strong>
+            <small>Common in everyday counting.</small>
+          </div>
+          <div className="unit-fact">
+            <span>Franc</span>
+            <strong>1 MAD = 100 Franc</strong>
+            <small>A familiar spoken convention.</small>
+          </div>
+        </div>
+
+        <details className="unit-convention">
+          <summary><Info size={16} /> About regional conventions</summary>
+          <p>This tool uses 1 MAD = 20 Ryal = 100 Franc. Colloquial usage can vary by region and context.</p>
+        </details>
+
+        <p className="unit-culture-note"><Heart size={13} /> The words change. The value stays the same.</p>
+      </div>
       <span className="sr-only" aria-live="polite">{copiedUnit ? 'Value copied to clipboard' : ''}</span>
     </section>
   );
