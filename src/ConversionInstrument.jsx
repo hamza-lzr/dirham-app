@@ -3,7 +3,6 @@ import {
   ArrowDownUp,
   Check,
   CheckCircle2,
-  ChevronDown,
   Clock3,
   Copy,
   Info,
@@ -43,22 +42,21 @@ export default function ConversionInstrument({ model }) {
     <section className="conversion-page" aria-labelledby="global-conversion-title">
       <div className="conversion-layout">
         <header className="conversion-intro">
-          <p className="eyebrow">Everyday exchange, made clear</p>
-          <h1 id="global-conversion-title">Convert with confidence.</h1>
-          <p>Live currency guidance built for Morocco, without the market-screen noise.</p>
+          <p className="eyebrow">Morocco-first money converter</p>
+          <h1 id="global-conversion-title">Understand Moroccan money.</h1>
+          <p>From the currency you know to the words you’ll hear in Morocco.</p>
         </header>
 
-        <div className="instrument-card">
-          <div className="instrument-field instrument-source">
-            <FieldLabel label="You send" currency={model.fromName} />
-            <div className="instrument-control-row">
+        <div className="editorial-converter">
+          <div className="editorial-line editorial-source">
+            <span className="editorial-lead">I have</span>
+            <div className="editorial-value-row">
               <AmountInput model={model} />
               {model.renderCurrencyControl(model.fromCurrency)}
             </div>
             <QuickAmounts model={model} />
           </div>
 
-          <div className="instrument-divider" aria-hidden="true" />
           <button
             className="instrument-swap"
             type="button"
@@ -68,9 +66,9 @@ export default function ConversionInstrument({ model }) {
             <ArrowDownUp size={19} />
           </button>
 
-          <div className="instrument-field instrument-result">
-            <FieldLabel label="You receive" currency={model.toName} />
-            <div className="instrument-control-row">
+          <div className="editorial-line editorial-result">
+            <span className="editorial-lead">which is</span>
+            <div className="editorial-value-row">
               <ResultValue model={model} />
               {model.renderCurrencyControl(model.toCurrency)}
             </div>
@@ -78,34 +76,22 @@ export default function ConversionInstrument({ model }) {
           </div>
 
           <RateTrust model={model} />
-        </div>
 
-        <details className="unit-summary">
-          <summary>
-            <span>
-              <strong>See it in Moroccan units</strong>
-              <small>Dirham, ryal, and franc at a glance</small>
-            </span>
-            <ChevronDown size={18} />
-          </summary>
+          <section className="unit-summary" aria-labelledby="spoken-units-title">
+            <div className="unit-summary-heading">
+              <h2 id="spoken-units-title">Say it locally</h2>
+              <p>One value. Three ways to say it.</p>
+            </div>
           <UnitList model={model} />
-        </details>
+          </section>
 
-        <p className="page-footnote">Rates are informational and may differ from bank or cash-exchange quotes.</p>
+          <p className="page-footnote">Ryal and Franc use fixed local conventions. Currency rates are informational.</p>
+        </div>
         <span className="sr-only" aria-live="polite">
           {model.copiedKey ? 'Value copied to clipboard' : ''}
         </span>
       </div>
     </section>
-  );
-}
-
-function FieldLabel({ label, currency }) {
-  return (
-    <div className="instrument-label">
-      <span>{label}</span>
-      <small>{currency}</small>
-    </div>
   );
 }
 
@@ -231,9 +217,10 @@ function RateTrust({ model }) {
 }
 
 function UnitList({ model }) {
+  const spokenUnits = model.unitValues.filter(unit => unit.key !== 'mad');
   return (
     <div className="unit-list">
-      {model.unitValues.map(unit => (
+      {spokenUnits.map(unit => (
         <button
           key={unit.key}
           type="button"

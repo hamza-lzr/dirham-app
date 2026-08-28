@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeftRight, Coins, Moon, Sun } from 'lucide-react';
 import CurrencyConverter from './CurrencyConverter';
 import GrandmaCounter from './GrandmaCounter';
-import BrandMark from './BrandMark';
 import './App.css';
 
 const TOOL_ROUTES = {
@@ -19,7 +18,7 @@ const getInitialTheme = () => {
     const savedTheme = localStorage.getItem(THEME_KEY);
     if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
   } catch (_) {}
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 };
 
 const getToolFromUrl = () => (
@@ -50,14 +49,14 @@ function App() {
     document.documentElement.style.colorScheme = theme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute(
       'content',
-      theme === 'dark' ? '#101813' : '#F6F1E8'
+      theme === 'dark' ? '#0d211b' : '#f3eee3'
     );
     try { localStorage.setItem(THEME_KEY, theme); } catch (_) {}
   }, [theme]);
 
   return (
     <div className="app-frame">
-      <div className="moroccan-pattern min-h-screen">
+      <div className="moroccan-pattern">
         <a
           className="skip-link"
           href="#main-content"
@@ -71,10 +70,9 @@ function App() {
         <header className="app-header">
           <div className="header-inner">
             <a className="wordmark" href={TOOL_ROUTES.global} aria-label="Dirham o Sserf home">
-              <BrandMark />
               <span className="wordmark-copy">
                 <strong>Dirham o Sserf</strong>
-                <small>Morocco-first money guide</small>
+                <small>Morocco-first money converter</small>
               </span>
             </a>
 
@@ -84,14 +82,15 @@ function App() {
                   active={activeTool === 'global'}
                   href={TOOL_ROUTES.global}
                   icon={<ArrowLeftRight size={15} />}
-                  label="Global"
+                  label="Convert"
+                  compactLabel="Convert"
                 />
                 <NavTab
                   active={activeTool === 'units'}
                   href={TOOL_ROUTES.units}
                   icon={<Coins size={15} />}
-                  label="Moroccan Units"
-                  compactLabel="Local Units"
+                  label="Local units"
+                  compactLabel="Units"
                 />
               </nav>
               <button

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Check, Copy, Heart, Info, RotateCcw, Sparkles } from 'lucide-react';
+import { Check, Copy, Info, RotateCcw } from 'lucide-react';
 import { copyText } from './utils/clipboard';
 
 const UNITS = {
@@ -69,16 +69,16 @@ export default function GrandmaCounter() {
   return (
     <section className="page-shell units-page" aria-labelledby="moroccan-units-title">
       <div className="page-heading">
-        <div className="eyebrow"><Sparkles size={13} /> Local money guide</div>
-        <h1 id="moroccan-units-title">Moroccan Units</h1>
-        <p>Dirham, Ryal, and Franc—kept simple.</p>
+        <div className="eyebrow">Moroccan unit converter</div>
+        <h1 id="moroccan-units-title">Speak money like a local.</h1>
+        <p>Someone quoted you in Ryal or Franc? Type it exactly as you heard it and get the Dirham value instantly.</p>
       </div>
 
       <div className="units-panel">
         <div className="units-panel-heading">
           <div>
-            <span className="section-label">One amount, three local units</span>
-            <h2>Enter any amount</h2>
+            <span className="section-label">Moroccan unit conversion</span>
+            <h2>Type in any box</h2>
           </div>
           <button
             type="button"
@@ -158,7 +158,7 @@ export default function GrandmaCounter() {
           <p>This tool uses 1 MAD = 20 Ryal = 100 Franc. Colloquial usage can vary by region and context.</p>
         </details>
 
-        <p className="unit-culture-note"><Heart size={13} /> The words change. The value stays the same.</p>
+        <p className="unit-culture-note">Different words. Same money. More confident conversations.</p>
       </div>
       <span className="sr-only" aria-live="polite">{copiedUnit ? 'Value copied to clipboard' : ''}</span>
     </section>
